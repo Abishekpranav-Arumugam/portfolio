@@ -161,26 +161,30 @@ export default function App() {
     const emailBody = `Hello Abishek Pranav,\n\nYou have received a new message from your portfolio website:\n\nName: ${formData.name}\nEmail: ${formData.email}\nSubject: ${emailSubject}\n\nMessage:\n${formData.message}`;
 
     try {
-      // Send directly to abishekpranav2004@gmail.com via activated FormSubmit token
-      const response = await fetch(
-        'https://formsubmit.co/ajax/04b8ec8b41a388d4879735c47c4ec318',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
-          },
-          body: JSON.stringify({
-            Name: formData.name,
-            Email: formData.email,
-            Subject: emailSubject,
-            Message: formData.message,
-            _replyto: formData.email,
-            _subject: `Portfolio Contact: ${emailSubject}`,
-            _template: 'table',
-          }),
-        }
-      );
+      // On localhost use the activated localhost token; on Vercel/live domain use email endpoint so it works on any domain
+      const isLocal =
+        window.location.hostname === 'localhost' ||
+        window.location.hostname === '127.0.0.1';
+      const formEndpoint = isLocal
+        ? 'https://formsubmit.co/ajax/04b8ec8b41a388d4879735c47c4ec318'
+        : `https://formsubmit.co/ajax/${personalData.email}`;
+
+      const response = await fetch(formEndpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify({
+          Name: formData.name,
+          Email: formData.email,
+          Subject: emailSubject,
+          Message: formData.message,
+          _replyto: formData.email,
+          _subject: `Portfolio Contact: ${emailSubject}`,
+          _template: 'table',
+        }),
+      });
 
       const result = await response.json();
 
